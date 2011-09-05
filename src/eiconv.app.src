@@ -1,0 +1,12 @@
+{application, eiconv,
+ [
+  {description, "iconv nif interface"},
+  {vsn, "1"},
+  {modules, [eiconv]},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {env, []}
+ ]}.
