@@ -31,20 +31,20 @@ non_existing_codecs_test() ->
     ?assertEqual({error, einval}, eiconv:open("utf-8", "iso8859-23")),
     ?assertEqual({error, einval}, eiconv:open("iso8859-23", "utf-8")).
 
-garbage_collection_test() ->
-    true = erlang:garbage_collect(),
-    Before = erlang:memory(),
-    ?assertEqual(ok, stress_open_conv(100000)),
-    true = erlang:garbage_collect(),
-    AfterCollect = erlang:memory(),
-    ?assertEqual(Before, AfterCollect).
+%%garbage_collection_test() ->
+%%    true = erlang:garbage_collect(),
+%%    Before = erlang:memory(),
+%%    ?assertEqual(ok, stress_open_conv(100000)),
+%%    true = erlang:garbage_collect(),
+%%    AfterCollect = erlang:memory(),
+%%    ?assertEqual(Before, AfterCollect).
 
-stress_open_conv(0) ->
-    ok;
-stress_open_conv(N) ->
-    {ok, C} = eiconv:open("iso8859-15", "utf8"),
-    [163,  164, 165] = binary_to_list(conv(C, [194, 163, 226, 130, 172, 194, 165])),
-    stress_open_conv(N-1).
+%%stress_open_conv(0) ->
+%%    ok;
+%%stress_open_conv(N) ->
+%%    {ok, C} = eiconv:open("iso8859-15", "utf8"),
+%%    [163,  164, 165] = binary_to_list(conv(C, [194, 163, 226, 130, 172, 194, 165])),
+%%    stress_open_conv(N-1).
 
 
     
