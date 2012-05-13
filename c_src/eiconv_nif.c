@@ -58,7 +58,7 @@ static ERL_NIF_TERM eiconv_open_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM
    */
   cd = enif_alloc_resource(eiconv_cd_type, sizeof(eiconv_cd));
   cd->cd = iconv_open(tocode, fromcode);
-  if(-1 == (int) cd->cd) {
+  if((iconv_t)(-1) == cd->cd) {
     enif_release_resource(cd);
     return eiconv_make_error(env, EINVAL);
   }

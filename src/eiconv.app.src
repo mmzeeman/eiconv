@@ -1,8 +1,8 @@
 {application, eiconv,
  [
   {description, "iconv nif interface"},
-  {vsn, "1"},
-  {modules, [eiconv]},
+  {vsn, "1.1"},
+  {modules, [eiconv, iconv]},
   {registered, []},
   {applications, [
                   kernel,
