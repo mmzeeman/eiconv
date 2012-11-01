@@ -4,9 +4,6 @@
   {vsn, "1.1"},
   {modules, [eiconv, iconv]},
   {registered, []},
-  {applications, [
-                  kernel,
-                  stdlib
-                 ]},
+  {applications, [ kernel, stdlib ]},
   {env, []}
  ]}.

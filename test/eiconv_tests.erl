@@ -31,6 +31,12 @@ non_existing_codecs_test() ->
     ?assertEqual({error, einval}, eiconv:open("utf-8", "iso8859-23")),
     ?assertEqual({error, einval}, eiconv:open("iso8859-23", "utf-8")).
 
+convert_encoding_test() ->
+    ?assertEqual({error, einval}, eiconv:convert("utf-9", "Test, 123")),
+    ?assertEqual({error, einval}, eiconv:convert("utf-8", "non-existent", "Test, 123")),
+    ?assertEqual({ok, <<"123">>}, eiconv:convert("utf-8", "ascii", "123")),
+    ?assertEqual({ok, <<"123">>}, eiconv:convert("ascii", "123")).
+
 %%garbage_collection_test() ->
 %%    true = erlang:garbage_collect(),
 %%    Before = erlang:memory(),
