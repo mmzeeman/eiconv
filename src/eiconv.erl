@@ -27,10 +27,10 @@ open(_ToCode, _FromCode) ->
 conv(_Cd, _Input) ->
     exit(nif_library_not_loaded).
 
-% @doc Close the encoder.
+% @doc Close the encoder - dummy function, close will be done by the garbage collector.
 %
 close(_Cd) ->
-    exit(nif_library_not_loaded).
+    ok.
 
 
 % @doc Convert input FromEncoding to utf-8

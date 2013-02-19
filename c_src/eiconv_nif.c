@@ -3,6 +3,7 @@
  */
 
 #include <iconv.h>
+#include <string.h>
 #include <errno.h>
 #include <erl_nif.h>
 
@@ -25,7 +26,8 @@ typedef struct {
 
 static void descruct_eiconv_cd(ErlNifEnv *env, void *cd)
 {
-  iconv_close(((eiconv_cd *) cd)->cd);
+  if (((eiconv_cd *) cd)->cd != (iconv_t)(-1))
+    iconv_close(((eiconv_cd *) cd)->cd);
 }
 
 static ERL_NIF_TERM eiconv_make_error(ErlNifEnv* env, int error_number) {
@@ -45,14 +47,33 @@ static ERL_NIF_TERM eiconv_make_error(ErlNifEnv* env, int error_number) {
 static ERL_NIF_TERM eiconv_open_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) 
 {
   char tocode[CONV_DESC_LEN], fromcode[CONV_DESC_LEN];
+  ErlNifBinary tocode_bin, fromcode_bin;
   eiconv_cd *cd;
   ERL_NIF_TERM conv_d;
   
-  if(!enif_get_string(env, argv[0], tocode, CONV_DESC_LEN, ERL_NIF_LATIN1)) 
+  if (!enif_inspect_iolist_as_binary(env, argv[0], &tocode_bin))
     return enif_make_badarg(env);
 
-  if(!enif_get_string(env, argv[1], fromcode, CONV_DESC_LEN, ERL_NIF_LATIN1))
+  if (!enif_inspect_iolist_as_binary(env, argv[1], &fromcode_bin))
     return enif_make_badarg(env);
+
+  if (tocode_bin.size >= CONV_DESC_LEN-1)
+    return enif_make_badarg(env);
+
+  if (fromcode_bin.size >= CONV_DESC_LEN-1)
+    return enif_make_badarg(env);
+
+  memcpy((void*) tocode, tocode_bin.data, tocode_bin.size);
+  tocode[tocode_bin.size] = '\0';
+
+  memcpy((void *) fromcode, fromcode_bin.data, fromcode_bin.size);
+  fromcode[fromcode_bin.size] = '\0';
+
+  // if(!enif_get_string(env, argv[0], tocode, CONV_DESC_LEN, ERL_NIF_LATIN1)) 
+  //   return enif_make_badarg(env);
+
+  // if(!enif_get_string(env, argv[1], fromcode, CONV_DESC_LEN, ERL_NIF_LATIN1))
+  //   return enif_make_badarg(env);
 
   /* Allocate the resource
    */
@@ -77,6 +98,9 @@ static ERL_NIF_TERM eiconv_conv_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM
   size_t inbytesleft, outbytesleft, outbufsize, rc;
 
   if (!enif_get_resource(env, argv[0], eiconv_cd_type, (void **) &cd))
+    return enif_make_badarg(env);
+
+  if (((eiconv_cd *) cd)->cd == (iconv_t)(-1))
     return enif_make_badarg(env);
   
   if (!enif_inspect_iolist_as_binary(env, argv[1], &inbuf))
