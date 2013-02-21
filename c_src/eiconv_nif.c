@@ -19,7 +19,6 @@
 #include <errno.h>
 #include <erl_nif.h>
 
-
 static ErlNifResourceType *eiconv_cd_type = NULL;
 
 typedef struct { 
@@ -98,8 +97,6 @@ eiconv_open_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
         enif_release_resource(cd);
         return eiconv_make_error(env, EINVAL);
     }
-    cd->restbuf.data = NULL;
-    cd->restbuf.size = 0;
     
     conv_d = enif_make_resource(env, cd);
     enif_release_resource(cd); 

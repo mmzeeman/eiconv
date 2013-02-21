@@ -109,6 +109,7 @@ convert(FromEncoding, ToEncoding, Input) ->
     end.
 
 %% Helpers
+
 split_input(MaxSize, Input) when MaxSize > 0 ->
     case iolist_to_binary(Input) of
         <<Chunk:MaxSize/binary, Rest/binary>> ->
