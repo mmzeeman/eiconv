@@ -12,7 +12,8 @@ conv(C, I) ->
 
 %% Some simple tests...
 ascii_to_utf8_test() ->
-    {ok, C} = iconv:open("utf8", "ascii"),
+    %% The encodings could be binaries and lists. Input also
+    {ok, C} = iconv:open("utf8", <<"ascii">>),
     ?assertEqual(<<"123">>, conv(C, "123")),
     ?assertEqual(<<"123">>, conv(C, ["123"])),
     ?assertEqual(<<"123">>, conv(C, <<"123">>)).
