@@ -10,6 +10,8 @@
 % easy api one shot convert api
 -export([convert/2, convert/3]).
 
+-define(DEFAULT_CHUNK_SIZE, 1024 * 128).
+
 -on_load(init/0).
 
 % @doc Load the nif
@@ -41,15 +43,35 @@ finalize(_Cd) ->
 % @doc Convert Input into the requested encoding.
 %
 conv(Cd, Input) ->
-    try
-        case chunk(Cd, Input) of
-            {done, Result} -> 
-                {ok, Result};
-            {more, _Result} ->
-                {error, einval}
-        end
-    after
-        finalize(Cd)
+    conv(Cd, Input, ?DEFAULT_CHUNK_SIZE).
+
+% @doc Convert input. The input will first be split into 
+% chunks of ChunkSize before being converted by the nif.
+%
+conv(Cd, Input, ChunkSize) ->
+    Chunks = split_input(ChunkSize, Input),
+    case conv1(Cd, Chunks, []) of
+        {ok, Converted} -> 
+            {ok, erlang:iolist_to_binary(Converted)};
+        {error,_}=Error -> 
+            Error
+    end.
+    
+conv1(Cd, [], Acc) ->
+    case finalize(Cd) of
+        ok ->
+            {ok, lists:reverse(Acc)};
+        {rest, _} ->
+            {error, einval}
+    end;
+conv1(Cd, [H|T], Acc) ->
+    case chunk(Cd, H) of
+        {error, _}=Error ->
+            Error;
+        {What, <<>>} when What =:= done orelse What =:= more ->
+            conv1(Cd, T, Acc);
+        {What, Result} when What =:= done orelse What =:= more ->
+            conv1(Cd, T, [Result | Acc])
     end.
 
 % @doc Close the encoder - dummy function, close will be done by the garbage collector.
@@ -70,5 +92,13 @@ convert(FromEncoding, ToEncoding, Input) ->
             conv(Cd, Input);
         {error, _}=Error ->
             Error
+    end.
+
+%% Helpers
+split_input(MaxSize, Input) when MaxSize > 0 ->
+    case iolist_to_binary(Input) of
+        <<Chunk:MaxSize/binary, Rest/binary>> ->
+            [Chunk | split_input(MaxSize, Rest)];
+        Chunk -> [Chunk]
     end.
 
