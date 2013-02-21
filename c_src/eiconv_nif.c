@@ -173,8 +173,7 @@ eiconv_chunk_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
             cd->restbuf.size = inbytesleft;
 
             return enif_make_tuple2(env, make_atom(env, "more"), 
-                enif_make_binary(env, &outbuf));
-                        
+                enif_make_binary(env, &outbuf));          
         } else {
             enif_release_binary(&outbuf);
             return eiconv_make_error(env, errno);
