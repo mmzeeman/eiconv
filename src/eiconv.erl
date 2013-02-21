@@ -16,10 +16,11 @@
 %
 init() ->
     NifName = "eiconv_nif",
-    NifFileName = case code:priv_dir(esqlite) of
-        {error, bad_name} -> filename:join("priv", NifName);
-        Dir -> filename:join(Dir, NifName)
+    NifFileName = case code:priv_dir(eiconv) of
+        {error, bad_name} -> filename:join(["priv", NifName]);
+        Dir -> filename:join([Dir, NifName])
     end,
+
     ok = erlang:load_nif(NifFileName, 0).
 
 % @doc Open a new encoder which can be used to convert text from FromCode into ToCode.
