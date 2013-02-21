@@ -1,6 +1,18 @@
-/* 
- * eiconv -- an erlang iconv nif.
- */
+/*
+ * Copyright 2011, 2012, 2013 Maas-Maarten Zeeman
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+*/
 
 #include <iconv.h>
 #include <string.h>
@@ -13,18 +25,27 @@
 
 static ErlNifResourceType *eiconv_cd_type = NULL;
 
-static ERL_NIF_TERM _atom_ok;
-static ERL_NIF_TERM _atom_done;
-static ERL_NIF_TERM _atom_more;
-static ERL_NIF_TERM _atom_error;
-static ERL_NIF_TERM _atom_enomem;
-static ERL_NIF_TERM _atom_eilseq;
-static ERL_NIF_TERM _atom_einval;
-static ERL_NIF_TERM _atom_eunknown;
-
 typedef struct { 
     iconv_t cd; 
 } eiconv_cd;
+
+static ERL_NIF_TERM 
+make_atom(ErlNifEnv *env, const char *atom_name) 
+{
+    ERL_NIF_TERM atom;
+  
+    if(enif_make_existing_atom(env, atom_name, &atom, ERL_NIF_LATIN1)) 
+       return atom;
+
+    return enif_make_atom(env, atom_name);
+}
+
+static ERL_NIF_TERM 
+make_error_tuple(ErlNifEnv *env, const char *reason)
+{
+    return enif_make_tuple2(env, make_atom(env, "error"), 
+        make_atom(env, reason));
+}
 
 static void descruct_eiconv_cd(ErlNifEnv *env, void *cd)
 {
@@ -37,17 +58,11 @@ static void descruct_eiconv_cd(ErlNifEnv *env, void *cd)
 
 static ERL_NIF_TERM 
 eiconv_make_error(ErlNifEnv* env, int error_number) {
-    ERL_NIF_TERM error;
-
-    if(error_number == EILSEQ) {
-        error = _atom_eilseq;
-    } else if (error_number == EINVAL) {
-        error = _atom_einval;
-    } else {
-        error = _atom_eunknown;
-    }
-
-    return enif_make_tuple2(env, _atom_error, error);
+    if(error_number == EILSEQ) 
+        return make_error_tuple(env, "eilseq");
+    if(error_number == EINVAL)
+        return make_error_tuple(env, "einval");
+    return make_error_tuple(env, "eunknown");
 }
  
 static ERL_NIF_TERM 
@@ -88,7 +103,7 @@ eiconv_open_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
     conv_d = enif_make_resource(env, cd);
     enif_release_resource(cd); 
 
-    return enif_make_tuple2(env, _atom_ok, conv_d);
+    return enif_make_tuple2(env, make_atom(env, "ok"), conv_d);
 }
 
 static ERL_NIF_TERM 
@@ -115,10 +130,11 @@ eiconv_conv_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
     outbytesleft = outbufsize;
 
     if(!enif_alloc_binary(outbufsize, &outbuf)) 
-        return enif_make_tuple2(env, _atom_error, _atom_enomem);
+        return make_error_tuple(env, "enomem");
 
     out = outbuf.data;
     
+    /* reset the cd structure */
     iconv(cd->cd, NULL, NULL, NULL, NULL);
 
     do {
@@ -131,7 +147,7 @@ eiconv_conv_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 
             if (!enif_realloc_binary(&outbuf, outbufsize)) {
 	           enif_release_binary(&outbuf);
-	           return enif_make_tuple2(env, _atom_error, _atom_enomem);
+	           return make_error_tuple(env, "enomem");
             }
 
             out = outbuf.data + (outbufsize - outbytesleft);
@@ -144,7 +160,8 @@ eiconv_conv_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
     if(outbytesleft > 0)
         enif_realloc_binary(&outbuf, outbufsize - outbytesleft);
 
-    return enif_make_tuple2(env, _atom_ok, enif_make_binary(env, &outbuf));
+    return enif_make_tuple2(env, 
+        make_atom(env, "ok"), enif_make_binary(env, &outbuf));
 }
 
 static ERL_NIF_TERM 
@@ -171,7 +188,7 @@ eiconv_chunk_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
     outbytesleft = outbufsize;
 
     if(!enif_alloc_binary(outbufsize, &outbuf)) 
-        return enif_make_tuple2(env, _atom_error, _atom_enomem);
+        return make_error_tuple(env, "enomem");
 
     out = outbuf.data;
     
@@ -187,7 +204,7 @@ eiconv_chunk_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 
             if (!enif_realloc_binary(&outbuf, outbufsize)) {
                enif_release_binary(&outbuf);
-               return enif_make_tuple2(env, _atom_error, _atom_enomem);
+               return make_error_tuple(env, "enomem");
             }
 
             out = outbuf.data + (outbufsize - outbytesleft);
@@ -195,7 +212,8 @@ eiconv_chunk_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
             /* we got an incomplete character sequence */
             if(outbytesleft > 0)
                 enif_realloc_binary(&outbuf, outbufsize - outbytesleft);
-            return enif_make_tuple2(env, _atom_more, enif_make_binary(env, &outbuf));
+            return enif_make_tuple2(env, make_atom(env, "more"), 
+                enif_make_binary(env, &outbuf));
         } else {
             enif_release_binary(&outbuf);
             return eiconv_make_error(env, errno);
@@ -205,7 +223,8 @@ eiconv_chunk_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
     if(outbytesleft > 0)
         enif_realloc_binary(&outbuf, outbufsize - outbytesleft);
 
-    return enif_make_tuple2(env, _atom_done, enif_make_binary(env, &outbuf));
+    return enif_make_tuple2(env, make_atom(env, "done"), 
+        enif_make_binary(env, &outbuf));
 }
 
 /* 
@@ -226,7 +245,7 @@ eiconv_reset_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
         return enif_make_badarg(env);
 
     if(!enif_alloc_binary(outbufsize, &outbuf)) 
-        return enif_make_tuple2(env, _atom_error, _atom_enomem);
+        return make_error_tuple(env, "enomem");
 
     /* Reset the cd structure */
     out = outbuf.data;
@@ -240,7 +259,8 @@ eiconv_reset_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
     if(outbytesleft > 0)
         enif_realloc_binary(&outbuf, outbufsize - outbytesleft);
 
-    return enif_make_tuple2(env, _atom_ok, enif_make_binary(env, &outbuf));
+    return enif_make_tuple2(env, make_atom(env, "ok"), 
+        enif_make_binary(env, &outbuf));
 }
 
 
@@ -259,17 +279,6 @@ on_load(ErlNifEnv* env, void** priv, ERL_NIF_TERM info)
 
     eiconv_cd_type = rt;
 
-    /* Create some atoms 
-    */
-    _atom_ok = enif_make_atom(env, "ok");
-    _atom_more = enif_make_atom(env, "more");
-    _atom_done = enif_make_atom(env, "done");
-    _atom_error = enif_make_atom(env, "error");
-    _atom_enomem = enif_make_atom(env, "enomem");
-    _atom_eilseq = enif_make_atom(env, "eilseq");
-    _atom_einval = enif_make_atom(env, "einval");
-    _atom_eunknown = enif_make_atom(env, "eunknown");
-  
     return 0;
 }
 
