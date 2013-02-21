@@ -5,7 +5,7 @@
 -module(eiconv).
 -author("Maas-Maarten Zeeman <mmzeeman@xs4all.nl>").
 
--export([open/2, conv/2, chunk/2, reset/1, close/1]).
+-export([open/2, conv/2, chunk/2, finalize/1, close/1]).
 
 % easy api one shot convert api
 -export([convert/2, convert/3]).
@@ -28,26 +28,34 @@ init() ->
 open(_ToCode, _FromCode) ->
     exit(nif_library_not_loaded).
 
-% @doc Convert Input into the requested encoding.
-%
-conv(_Cd, _Input) ->
-    exit(nif_library_not_loaded).
-
-% @doc Convert a chunk, returns {ok, Converted, Rest}
+% @doc Convert a chunk, returns {done, ConvertedBytes} } | {more, Converted}
 %
 chunk(_Cd, _Input) ->
     exit(nif_library_not_loaded).
 
-% @doc Reset the cd structure, returns{ok, Rest}
+% @doc Reset the cd structure, returns ok | {rest, LeftOverBytes}
 %
-reset(_Cd) ->
+finalize(_Cd) ->
     exit(nif_library_not_loaded).
+
+% @doc Convert Input into the requested encoding.
+%
+conv(Cd, Input) ->
+    try
+        case chunk(Cd, Input) of
+            {done, Result} -> 
+                {ok, Result};
+            {more, _Result} ->
+                {error, einval}
+        end
+    after
+        finalize(Cd)
+    end.
 
 % @doc Close the encoder - dummy function, close will be done by the garbage collector.
 %
 close(_Cd) ->
     ok.
-
 
 % @doc Convert input FromEncoding to utf-8
 %
