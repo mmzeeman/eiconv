@@ -9,8 +9,4 @@ otp_release:
   - 17.1
   - 17.0
   - R16B03
-  - R15B01
-  - R15B
-  - R14B04
-  - R14B03
 script: "rebar compile eunit"
