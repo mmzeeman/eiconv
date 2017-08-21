@@ -19,4 +19,4 @@ clean: rebar
 	$(REBAR) clean
 
 distclean: 
-	rm $(REBAR)
+	rm -f ./rebar 
