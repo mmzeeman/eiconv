@@ -19,7 +19,7 @@ ascii_to_utf8_test() ->
 
 iso8859_15_to_utf8_test() ->
     {ok, C} = eiconv:open("utf8", "iso8859-15"),
-    ?assertEqual(<<194, 163,  226, 130, 172,  194, 165>>, 
+    ?assertEqual(<<194, 163,  226, 130, 172,  194, 165>>,
         conv(C, [163, 164, 165])).
 
 iso8859_15_to_utf8_chunks_test() ->
@@ -53,7 +53,7 @@ convert_encoding_test() ->
 
 iso8859_15_to_utf8_chunk_test() ->
     {ok, C} = eiconv:open("utf8", "iso8859-15"),
-    ?assertEqual({done,<<194,163,226,130,172,194,165>>}, 
+    ?assertEqual({done,<<194,163,226,130,172,194,165>>},
         eiconv:chunk(C, [163, 164, 165])),
     ?assertEqual(ok, eiconv:finalize(C)),
 
