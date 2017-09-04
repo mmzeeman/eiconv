@@ -3,3 +3,5 @@ priv/
 rebar
 c_src/*.o
 .eunit/
+_build
+c_src/eiconv_nif.d
