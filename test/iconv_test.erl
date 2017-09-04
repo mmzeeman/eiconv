@@ -21,7 +21,7 @@ ascii_to_utf8_test() ->
 iso8859_15_to_utf8_test() ->
     {ok, C} = iconv:open(<<"utf8">>, "iso8859-15"),
     ?assertEqual(<<194, 163,  226, 130, 172,  194, 165>>, conv(C, [163, 164, 165])).
-    
+
 utf8_to_iso8859_15_test() ->
     {ok, C} = iconv:open("iso8859-15", "utf8"),
     ?assertEqual(<<163,  164, 165>>, conv(C, [194, 163, 226, 130, 172, 194, 165])),
@@ -38,10 +38,6 @@ non_existing_codecs_test() ->
     ?assertEqual({error, einval}, iconv:open("utf-8", "iso8859-23")),
     ?assertEqual({error, einval}, iconv:open("iso8859-23", "utf-8")).
 
-
-
-
-    
-    
-    
-
+convert_encoding_test() ->
+    ?assertException(throw, einval, iconv:convert("utf-8", "non-existent", "Test, 123")),
+    ?assertEqual(<<"123">>, iconv:convert("utf-8", "ascii", "123")).

@@ -68,6 +68,16 @@ io:format("Converted '~s' to '~s'~n", [ToConvert, Converted])
 ok = eiconvclose(CD)
 ```
 
+## `iconv` API
+
+### Using `convert/3`
+
+```erlang
+Converted = eiconv:convert("utf-8", "ascii", "123"))
+```
+
+(Note it return directly the converted text and not a tuple {ok, Converted})
+
 ## Authors
 
 Wrapper provided by Maas-Maarten Zeeman and the [Zotonic](https://github.com/zotonic) team.
