@@ -19,3 +19,16 @@ otp_release:
   - 17.1
   - 17.0
   - R16B03
+
+jobs:
+  include:
+    - stage: deploy
+      otp_release: 20.0
+      script: skip
+      deploy:
+        provider: script
+        script: "bash -c 'source <(curl -s https://raw.githubusercontent.com/zotonic/hexpub/master/hexpub.sh)'"
+        skip_cleanup: true
+        on:
+          tags: true
+          all_branches: true

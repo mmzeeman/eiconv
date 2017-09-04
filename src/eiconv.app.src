@@ -1,9 +1,11 @@
-{application, eiconv,
- [
-  {description, "iconv nif interface"},
-  {vsn, "1.1"},
-  {modules, [eiconv, iconv]},
-  {registered, []},
-  {applications, [ kernel, stdlib ]},
-  {env, []}
- ]}.
+{application, eiconv, [
+    {description, "Iconv NIF interface"},
+    {vsn, "git"},
+    {modules, [eiconv, iconv]},
+    {registered, []},
+    {applications, [kernel, stdlib]},
+    {env, []},
+    {maintainers, ["Zotonic Team"]},
+    {licenses, ["Apache 2.0"]},
+    {links, [{"GitHub", "https://github.com/zotonic/z_stdlib"}]}
+]}.
