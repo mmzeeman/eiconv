@@ -12,33 +12,8 @@ Using [rebar3](http://www.rebar3.org/), add the dependency to your `rebar.config
 
 ```erlang
 {deps, [
-	{eiconv, ".*", {git, "git://github.com/zotonic/eiconv.git", {branch, "master"}}}
-]}.
-```
-
-You must also enable the compilation of `eiconv_nif.so` through [port_compiler](https://github.com/blt/port_compiler). Again, add in your `rebar.config` file:
-
-```erlang
-{overrides,
- [{override, eiconv,
-   [
-	{plugins, [pc]},
-	{port_env, [{"darwin|freebsd|openbsd", "LDFLAGS", "$LDFLAGS -liconv"},
-				{"freebsd|openbsd", "CFLAGS", "$CFLAGS -I/usr/local/include"},
-				{"freebsd|openbsd", "LDFLAGS", "$LDFLAGS -L/usr/local/lib"}]},
-
-	{port_specs, [{"priv/eiconv_nif.so", ["c_src/*.c"]}]},
-	{artifacts, ["priv/eiconv_nif.so"]},
-
-	{provider_hooks, [
-					  {post,
-					   [
-						{compile, {pc, compile}},
-						{clean, {pc, clean}}
-					   ]
-					  }]
-	}
-   ]}
+    {eiconv, "1.0.0-alpha1"},
+    %% ...
 ]}.
 ```
 
