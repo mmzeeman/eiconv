@@ -1,6 +1,7 @@
 # Erlang NIF wrapper for iconv
 
 [![Build Status](https://travis-ci.org/zotonic/eiconv.svg?branch=master)](https://travis-ci.org/zotonic/eiconv)
+[![Hex pm](http://img.shields.io/hexpm/v/eiconv.svg?style=flat)](https://hex.pm/packages/eiconv)
 
 An Erlang wrapper for the character set conversion utility [iconv](https://en.wikipedia.org/wiki/Iconv).
 
