@@ -17,6 +17,8 @@ Using [rebar3](http://www.rebar3.org/), add the dependency to your `rebar.config
 ]}.
 ```
 
+and run `$ rebar3 compile`.
+
 ### Use `eiconv` module
 
 To convert from `utf-8` to `ascii`:
