@@ -13,7 +13,7 @@ Using [rebar3](http://www.rebar3.org/), add the dependency to your `rebar.config
 
 ```erlang
 {deps, [
-    {eiconv, "1.0.0-alpha1"},
+    {eiconv, "1.0.0"},
     %% ...
 ]}.
 ```
