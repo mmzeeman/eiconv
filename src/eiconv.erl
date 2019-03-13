@@ -42,17 +42,17 @@ init() ->
 % @doc Open a new encoder which can be used to convert text from FromCode into ToCode.
 %
 open(_ToCode, _FromCode) ->
-    exit(nif_library_not_loaded).
+    erlang:nif_error(nif_library_not_loaded).
 
 % @doc Convert a chunk, returns {done, ConvertedBytes} } | {more, Converted}
 %
 chunk(_Cd, _Input) ->
-    exit(nif_library_not_loaded).
+    erlang:nif_error(nif_library_not_loaded).
 
 % @doc Reset the cd structure, returns ok | {rest, LeftOverBytes}
 %
 finalize(_Cd) ->
-    exit(nif_library_not_loaded).
+    erlang:nif_error(nif_library_not_loaded).
 
 % @doc Convert Input into the requested encoding.
 %
